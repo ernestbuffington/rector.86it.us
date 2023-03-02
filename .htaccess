@@ -19,6 +19,27 @@ DirectoryIndex index.php index.html
 Options +FollowSymlinks
 <IfModule mod_rewrite.c> 
 RewriteEngine on
+
+RewriteBase /
+
+##################################################################################################
+# Force SSL - no insecure data connections!                                                      ##### Added By Ernest Allen Buffington 08/05/2019
+##################################################################################################
+RewriteCond %{HTTPS} off
+#RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+RewriteCond %{REQUEST_URI} !^/[0-9]+\..+\.cpaneldcv$
+RewriteCond %{REQUEST_URI} !^/\.well-known/pki-validation/[A-F0-9]{32}\.txt(?:\ Comodo\ DCV)?$
+RewriteRule (.*) https://%{HTTP_HOST}:443%{REQUEST_URI}
+
+##################################################################################################
+# Force WWW - this is only needed for root domains...                                            ##### Added By Ernest Allen Buffington 03/16/2021
+##################################################################################################
+RewriteCond %{HTTP_HOST} !=""
+RewriteCond %{HTTP_HOST} !^www\. [NC]
+RewriteCond %{HTTPS}s ^on(s)|
+RewriteRule ^ http%1://www.%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+##################################################################################################
+
 # -------------------------------------------
 # Security Rewrites
 # -------------------------------------------
@@ -116,6 +137,7 @@ RewriteRule ^.*$ http://127.0.0.1 [R,L]
 <FilesMatch "\.(inc|tpl|h|ihtml|sql|ini|conf|class|bin|spd|theme|module|exe)$">
 deny from all
 </FilesMatch>
+
 # -------------------------------------------
 # Setup caching
 # -------------------------------------------
@@ -161,7 +183,7 @@ Header append Cache-Control "public"
 # To make changes to this file, use the cPanel MultiPHP INI Editor (Home >> Software >> MultiPHP INI Editor)
 # For more information, read our documentation (https://go.cpanel.net/EA4ModifyINI)
 <IfModule php8_module>
-   php_flag display_errors Off
+   php_flag display_errors On
    php_value max_execution_time 5000
    php_value max_input_time 5000
    php_value max_input_vars 1000
@@ -173,7 +195,7 @@ Header append Cache-Control "public"
    php_flag zlib.output_compression Off
 </IfModule>
 <IfModule lsapi_module>
-   php_flag display_errors Off
+   php_flag display_errors On
    php_value max_execution_time 5000
    php_value max_input_time 5000
    php_value max_input_vars 1000
